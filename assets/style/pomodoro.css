@@ -1,0 +1,183 @@
+/** reset **/
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+
+/** config **/
+
+:root {
+  --color-nasukon: #483850;
+  --color-nasukon-background: rgba(72, 56, 80, 0.5);
+  --color-tomato-background: rgba(255, 99, 71, 0.5);
+}
+
+
+/** base **/
+
+body {
+  font-family: 'メイリオ',  'Meiryo', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', sans-serif;
+  font-size: 12pt;
+  line-height: 20px;
+}
+
+
+/** main **/
+
+.main {
+  margin: 10px 20px;
+  padding: 10px;
+  border: 1px solid var(--color-nasukon);
+  border-radius: 10px;
+}
+
+.title {
+  margin: 5px 10px;
+  padding-bottom: 0;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+}
+.title:before, .title:after {
+  content: "\01f345";
+}
+.title span {
+  display: inline-block;
+  padding: 5px 10px;
+  color: tomato;
+  border-bottom: 1px solid var(--color-nasukon);
+}
+
+.menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  height: 1.5rem;
+  width: 4rem;
+  background-color: var(--color-tomato-background);
+  font-weight: bold;
+}
+.menu-close:before {
+  content: "設定 ＞";
+}
+.menu-open:before {
+  content: "×";
+}
+
+.config {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-tomato-background);
+  width: 50%;
+}
+.config dl {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px 0;
+}
+.config dt {
+  padding-right: 5px;
+  width: 10rem;
+  font-weight: bold;
+  text-align: right;
+  line-height: 1.8rem;
+}
+.config dt:after {
+  content: ": ";
+}
+.config dd {
+  width: calc(100% - 12rem);
+}
+.config .unit-minute:after {
+  content: "分";
+}
+.config .unit-count:after {
+  content: "回";
+}
+.config dd input {
+  margin-right: 5px;
+  padding: 0 5px;
+  width: 3rem;
+  text-align: right;
+  font-size: 1.2rem;
+}
+
+.timer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: url("./../image/tomato_red.png") no-repeat;
+  background-color: rgba(255, 255, 255, 0.3);
+  background-blend-mode: lighten;
+  background-size: contain;
+  background-position: center;
+}
+.timer span {
+  font-weight: bold;
+  font-size: 4rem;
+  color: #FFFF99;
+  text-align: center;
+  line-height: 4rem;
+}
+.timer .turns {
+  margin-top: 8rem;
+  width: 100%;
+}
+.timer .turns:after {
+  content: "回目";
+}
+.timer .hms {
+  margin: 0.5rem 0;
+  width: 100%;
+}
+.timer .status {
+  margin-bottom: 3rem;
+  padding: 0 0.5rem;
+  font-size: 3rem;
+  color: rgba(255, 255, 153, 0.8);
+  border: 2px solid #FFFF99;
+}
+
+.control {
+  text-align: center;
+}
+.control button {
+  margin: 5px 10px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background-color: tomato;
+  color: var(--color-nasukon);
+  font-size: 2rem;
+}
+.control .button-start {
+}
+.control .button-stop {
+}
+.control .button-reset {
+  background-color: var(--color-tomato-background);
+  font-size: 1.6rem;
+}
+
+.footer {
+  margin: 0 10px;
+  margin-top: 20px;
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-nasukon);
+  color: var(--color-nasukon);
+}
+.footer span {
+  padding-right: 20px;
+  width: 100%;
+  text-align: right;
+}
+.footer .copyrights {
+  font-size: 0.8rem;
+  line-height: 1rem;
+}
+

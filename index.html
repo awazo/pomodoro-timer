@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <link href="./assets/style/pomodoro.css" rel="stylesheet" >
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+    crossorigin="anonymous"></script>
   <script src="./assets/script/pomodoro.js"></script>
   <title>pomodoro timer</title>
 </head>
@@ -11,33 +14,160 @@
 <main>
   <article class="main">
     <div class="title"><span>Pomodoro Timer</span></div>
-    <div class="menu"></div>
+    <div class="menu menu-close"></div>
     <div class="config">
       <dl>
         <dt>作業時間</dt>
-        <dd class="unit-minute"><input type="text" value="25" /></dd>
+        <dd class="unit-minute">
+          <input type="text" id="confWorkMinute" value="25" />
+        </dd>
         <dt>休憩時間</dt>
-        <dd class="unit-minute"><input type="text" value="5" /></dd>
+        <dd class="unit-minute">
+          <input type="text" id="confRestMinute" value="5" />
+        </dd>
         <dt>繰り返し回数</dt>
-        <dd class="unit-count"><input type="text" value="4" /></dd>
+        <dd class="unit-count">
+          <input type="text" id="confTurns" value="4" />
+        </dd>
         <dt>長めの休憩時間</dt>
-        <dd class="unit-minute"><input type="text" value="15" /></dd>
+        <dd class="unit-minute">
+          <input type="text" id="confLongRestMinute" value="15" />
+        </dd>
       </dl>
     </div>
     <div class="timer">
-      <span class="turns"></span>
-      <span class="hms"></span>
+      <span class="turns">1</span>
+      <span class="hms">00:00:00</span>
+      <span class="status"></span>
     </div>
     <div class="control">
-      <button type="button" class="button-start"
-        onclick="onClickStart();">Start</button>
-      <button type="button" class="button-stop"
-        onclick="onClickStop();">Stop</button>
-      <button type="button" class="button-reset"
-        onclick="onClickReset();">Reset</button>
+      <button type="button" class="button-start">Start</button>
+      <button type="button" class="button-stop">Stop</button>
+      <button type="button" class="button-reset">Reset</button>
+    </div>
+    <div class="footer">
+      <span class="copyrights">image by いらすとや</span>
+      <span class="copyrights">sound by OtoLogic</span>
     </div>
   </article>
 </main>
+
+<script>
+var soundWorkStart = new Audio('./assets/sound/Accent43-1.mp3');
+var soundWorkEnd = new Audio('./assets/sound/Phrase02-1.mp3');
+
+$(function() {
+  $('.menu').click(onClickMenu);
+  $('.button-start').click(onClickStart);
+  $('.button-stop').click(onClickStop);
+  $('.button-reset').click(onClickReset);
+
+  initialize();
+});
+
+function initialize() {
+  $('.config').hide();
+  hideStatus();
+  hideButtonStop();
+}
+
+// menu open: true, menu close: false
+var menuStatus = false;
+function onClickMenu() {
+  if (isMenuOpen()) closeMenu();
+  else openMenu();
+}
+function openMenu() {
+  menuStatus = true;
+  showConfig();
+}
+function closeMenu() {
+  hideConfig();
+  menuStatus = false;
+}
+function isMenuOpen() { return menuStatus; }
+function showConfig() {
+  $('.config').slideDown();
+}
+function hideConfig() {
+  $('.config').slideUp();
+}
+
+function showStatus(msg) {
+  let jqStatus = $('.timer .status');
+  jqStatus.css('visibility', 'visible');
+  if ((typeof msg === 'string') && (msg.length > 0)) {
+    jqStatus.text(msg);
+  }
+}
+function hideStatus() {
+  $('.timer .status').html('&nbsp;').css('visibility', 'hidden');
+}
+
+function showButtonStart() {
+  $('.button-start').show();
+}
+function hideButtonStart() {
+  $('.button-start').hide();
+}
+function showButtonStop() {
+  $('.button-stop').show();
+}
+function hideButtonStop() {
+  $('.button-stop').hide();
+}
+
+function onClickStart() {
+  pomodoroInitialize();
+  pomodoro.start(pomodoroUpdate);
+  hideButtonStart();
+  showButtonStop();
+}
+
+function onClickStop() {
+  pomodoro.stop();
+  hideButtonStop();
+  showButtonStart();
+}
+
+function onClickReset() {
+  pomodoro.resetTurn();
+}
+
+function pomodoroInitialize() {
+  let workMinute = $('#confWorkMinute').val();
+  let restMinute = $('#confRestMinute').val();
+  let turns = $('#confTurns').val();
+  let longRestMinute = $('#confLongRestMinute').val();
+  pomodoro.init(workMinute, restMinute, turns, longRestMinute);
+  pomodoro.on('workStart', pomodoroWorkStart);
+  pomodoro.on('workEnd', pomodoroWorkEnd);
+  pomodoro.on('restStart', pomodoroRestStart);
+  pomodoro.on('restEnd', pomodoroRestEnd);
+  pomodoro.on('longRestStart', pomodoroRestStart);
+  pomodoro.on('longRestEnd', pomodoroRestEnd);
+}
+function pomodoroUpdate(pomodoroCurrent) {
+  $('.timer .turns').text(pomodoroCurrent.turn);
+  let time = pomodoroCurrent.time;
+  let hour = ('00' + Math.floor(time / 3600)).slice(-2);
+  let minute = ('00' + Math.floor((time % 3600) / 60)).slice(-2);
+  let second = ('00' + (time % 60)).slice(-2);
+  $('.timer .hms').text(hour + ':' + minute + ':' + second);
+}
+function pomodoroWorkStart(pomodoroCurrent) {
+  soundWorkStart.play();
+}
+function pomodoroWorkEnd(pomodoroCurrent) {
+  soundWorkEnd.play();
+}
+function pomodoroRestStart(pomodoroCurrent) {
+  showStatus('休憩中');
+}
+function pomodoroRestEnd(pomodoroCurrent) {
+  hideStatus();
+}
+</script>
 
 </body>
 </html>
