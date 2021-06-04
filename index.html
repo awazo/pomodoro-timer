@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <link href="./assets/style/pomodoro.css" rel="stylesheet" >
+  <script src="./assets/script/pomodoro.js"></script>
+  <title>pomodoro timer</title>
+</head>
+<body>
+
+<main>
+  <article class="main">
+    <div class="title"><span>Pomodoro Timer</span></div>
+    <div class="menu"></div>
+    <div class="config">
+      <dl>
+        <dt>作業時間</dt>
+        <dd class="unit-minute"><input type="text" value="25" /></dd>
+        <dt>休憩時間</dt>
+        <dd class="unit-minute"><input type="text" value="5" /></dd>
+        <dt>繰り返し回数</dt>
+        <dd class="unit-count"><input type="text" value="4" /></dd>
+        <dt>長めの休憩時間</dt>
+        <dd class="unit-minute"><input type="text" value="15" /></dd>
+      </dl>
+    </div>
+    <div class="timer">
+      <span class="turns"></span>
+      <span class="hms"></span>
+    </div>
+    <div class="control">
+      <button type="button" class="button-start"
+        onclick="onClickStart();">Start</button>
+      <button type="button" class="button-stop"
+        onclick="onClickStop();">Stop</button>
+      <button type="button" class="button-reset"
+        onclick="onClickReset();">Reset</button>
+    </div>
+  </article>
+</main>
+
+</body>
+</html>
+
