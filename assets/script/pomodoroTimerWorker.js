@@ -1,4 +1,4 @@
-let scriptPath = 'file:///C:/Users/awazo/Desktop/repositories/git/pomodoro-timer/assets/script/';
+let scriptPath = '';
 
 importScripts(scriptPath + 'workerBase.js');
 
