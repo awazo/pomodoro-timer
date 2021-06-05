@@ -1,6 +1,11 @@
 let scriptPath = '';
 
+try {
 importScripts(scriptPath + 'workerBase.js');
+} catch(e) {
+  console.log(e);
+  console.log('for local use: setup script directory path as "file://xxx"');
+}
 
 var count = 0;
 var timer = null;
