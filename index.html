@@ -58,9 +58,11 @@ var soundWorkEnd = new Audio('./assets/sound/Phrase02-1.mp3');
 
 $(function() {
   $('.menu').click(onClickMenu);
+  $('.config input').on('change', onChangeConfig);
   $('.button-start').click(onClickStart);
   $('.button-stop').click(onClickStop);
   $('.button-reset').click(onClickReset);
+  pomodoroSetup();
 
   initialize();
 });
@@ -93,6 +95,12 @@ function hideConfig() {
   $('.config').slideUp();
 }
 
+function onChangeConfig() {
+  if (pomodoro.current.timerStatus === pomodoro.timerStatus.start)
+    onClickStop();
+  pomodoroInitialize();
+}
+
 function showStatus(msg) {
   let jqStatus = $('.timer .status');
   jqStatus.css('visibility', 'visible');
@@ -118,7 +126,6 @@ function hideButtonStop() {
 }
 
 function onClickStart() {
-  pomodoroInitialize();
   pomodoro.start(pomodoroUpdate);
   hideButtonStart();
   showButtonStop();
@@ -134,18 +141,20 @@ function onClickReset() {
   pomodoro.resetTurn();
 }
 
-function pomodoroInitialize() {
-  let workMinute = $('#confWorkMinute').val();
-  let restMinute = $('#confRestMinute').val();
-  let turns = $('#confTurns').val();
-  let longRestMinute = $('#confLongRestMinute').val();
-  pomodoro.init(workMinute, restMinute, turns, longRestMinute);
+function pomodoroSetup() {
   pomodoro.on('workStart', pomodoroWorkStart);
   pomodoro.on('workEnd', pomodoroWorkEnd);
   pomodoro.on('restStart', pomodoroRestStart);
   pomodoro.on('restEnd', pomodoroRestEnd);
   pomodoro.on('longRestStart', pomodoroRestStart);
   pomodoro.on('longRestEnd', pomodoroRestEnd);
+}
+function pomodoroInitialize() {
+  let workMinute = $('#confWorkMinute').val();
+  let restMinute = $('#confRestMinute').val();
+  let turns = $('#confTurns').val();
+  let longRestMinute = $('#confLongRestMinute').val();
+  pomodoro.init(workMinute, restMinute, turns, longRestMinute);
 }
 function pomodoroUpdate(pomodoroCurrent) {
   $('.timer .turns').text(pomodoroCurrent.turn);
@@ -156,6 +165,7 @@ function pomodoroUpdate(pomodoroCurrent) {
   $('.timer .hms').text(hour + ':' + minute + ':' + second);
 }
 function pomodoroWorkStart(pomodoroCurrent) {
+  hideStatus();
   soundWorkStart.play();
 }
 function pomodoroWorkEnd(pomodoroCurrent) {
