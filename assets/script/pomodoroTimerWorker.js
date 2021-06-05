@@ -1,12 +1,8 @@
-let scriptPath = './';
+let scriptPath = '';
 
-try {
-importScripts(scriptPath + 'workerBase.js');
-} catch(e) {
-  console.log(e);
-  console.log('for local use: setup script directory path as "file://xxx"');
-  throw e;
-}
+// for local use: setup script directory path as "file://xxx"
+// importScripts(scriptPath + 'workerBase.js');
+importScripts(scriptPath + 'test.js');
 
 var count = 0;
 var timer = null;
