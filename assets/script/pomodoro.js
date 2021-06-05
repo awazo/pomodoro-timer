@@ -50,11 +50,12 @@ pomodoro.setStatus = function(status) {
   if (!(status in pomodoro.status))
     pomodoro.current.status = pomodoro.status.init;
   if (status === pomodoro.current.status) return;
-  if ((pomodoro.current.status !== pomodoro.status.init)
-      && (status !== pomodoro.status.init))
+  if (!pomodoro.isSuppressEvent &&
+      (pomodoro.current.status !== pomodoro.status.init))
     pomodoro.event[pomodoro.current.status + 'End'](pomodoro.current);
   pomodoro.current.status = status;
-  if (pomodoro.current.status !== pomodoro.status.init)
+  if (!pomodoro.isSuppressEvent &&
+      (pomodoro.current.status !== pomodoro.status.init))
     pomodoro.event[pomodoro.current.status + 'Start'](pomodoro.current);
 };
 pomodoro.setTimerStatus = function(timerStatus) {
@@ -77,6 +78,7 @@ pomodoro.setCurrent = function(status, timerStatus, turn, time) {
 pomodoro.defaultUpdater = function(current) {};
 pomodoro.updater = pomodoro.defaultUpdater;
 
+pomodoro.isSuppressEvent = false;
 pomodoro.event = {
   workStart: function(current) {},
   workEnd: function(current) {},
@@ -92,24 +94,29 @@ pomodoro.on = function(event, handler) {
 };
 
 pomodoro.init = function(workMinute, restMinute, turns, longRestMinute) {
-  pomodoro.stop();
-  pomodoro.reset();
-  if ((workMinute == null) || isNaN(workMinute))
-    workMinute = pomodoro.defaultWorkMinute;
-  if ((restMinute == null) || isNaN(restMinute))
-    restMinute = pomodoro.defaultRestMinute;
-  if ((turns == null) || isNaN(turns))
-    turns = pomodoro.defaultTurns;
-  if ((longRestMinute == null) || isNaN(longRestMinute))
-    longRestMinute = pomodoro.defaultLongRestMinute;
-  pomodoro.config.workMinute = workMinute;
-  pomodoro.config.restMinute = restMinute;
-  pomodoro.config.turns = turns;
-  pomodoro.config.longRestMinute = longRestMinute;
-  pomodoro.setStatus(pomodoro.status.init);
-  pomodoro.setTimerStatus(pomodoro.timerStatus.stop);
-  pomodoro.current.turn = 1;
-  pomodoro.current.time = workMinute * 60;
+  try {
+    pomodoro.isSuppressEvent = true;
+    pomodoro.stop();
+    pomodoro.reset();
+    if ((workMinute == null) || isNaN(workMinute))
+      workMinute = pomodoro.defaultWorkMinute;
+    if ((restMinute == null) || isNaN(restMinute))
+      restMinute = pomodoro.defaultRestMinute;
+    if ((turns == null) || isNaN(turns))
+      turns = pomodoro.defaultTurns;
+    if ((longRestMinute == null) || isNaN(longRestMinute))
+      longRestMinute = pomodoro.defaultLongRestMinute;
+    pomodoro.config.workMinute = workMinute;
+    pomodoro.config.restMinute = restMinute;
+    pomodoro.config.turns = turns;
+    pomodoro.config.longRestMinute = longRestMinute;
+    pomodoro.setStatus(pomodoro.status.init);
+    pomodoro.setTimerStatus(pomodoro.timerStatus.stop);
+    pomodoro.current.turn = 1;
+    pomodoro.current.time = workMinute * 60;
+  } finally {
+    pomodoro.isSuppressEvent = false;
+  }
 };
 
 pomodoro.timer = null;
@@ -173,7 +180,17 @@ pomodoro.resetTurn = function() {
   let timerStatus = pomodoro.current.timerStatus;
   let turns = 1;
   let time = pomodoro.config.workMinute * 60;
-  pomodoro.setCurrent(status, timerStatus, turns, time);
+  if (pomodoro.current.timerStatus === pomodoro.timerStatus.stop)
+    status = pomodoro.status.init;
+  try {
+    pomodoro.isSuppressEvent = true;
+    pomodoro.setStatus(pomodoro.status.init);
+    if (pomodoro.current.timerStatus === pomodoro.timerStatus.start)
+      pomodoro.isSuppressEvent = false;
+    pomodoro.setCurrent(status, timerStatus, turns, time);
+  } finally {
+    pomodoro.isSuppressEvent = false;
+  }
   pomodoro.updater(pomodoro.current);
 };
 pomodoro.resetTime = function() {
@@ -188,7 +205,15 @@ pomodoro.resetTime = function() {
   } else if (pomodoro.current.status === pomodoro.status.longRest) {
     time = pomodoro.config.longRestMinute * 60;
   }
-  pomodoro.setCurrent(status, timerStatus, turns, time);
+  try {
+    pomodoro.isSuppressEvent = true;
+    pomodoro.setStatus(pomodoro.status.init);
+    if (pomodoro.current.timerStatus === pomodoro.timerStatus.start)
+      pomodoro.isSuppressEvent = false;
+    pomodoro.setCurrent(status, timerStatus, turns, time);
+  } finally {
+    pomodoro.isSuppressEvent = false;
+  }
   pomodoro.updater(pomodoro.current);
 };
 
