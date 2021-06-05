@@ -1,4 +1,4 @@
-let scriptPath = '';
+let scriptPath = 'assets/script/';
 
 try {
 importScripts(scriptPath + 'workerBase.js');
