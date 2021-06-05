@@ -180,6 +180,28 @@ function pomodoroRestEnd(pomodoroCurrent) {
 }
 </script>
 
+<script class="test">
+$('body').append($('<div></div>').addClass('test').attr('id', 'test'));
+$('.test').css('color', '#C0C0C0');
+
+let baseURL = window.location.href.replace(/\\/g, '/').replace(/\/[^\/]*$/, '/');
+let array = ['importScripts("' + baseURL + 'assets/script/pomodoroTimerWorker.js' + '");'];
+let blob = new Blob(array, {type: 'text/javascript'});
+let url = window.URL.createObjectURL(blob);
+
+let worker;
+try {
+worker = new Worker(url);
+} catch(e) {
+worker = new Worker('assets/script/pomodoroTimerWorker.js');
+}
+
+worker.onmessage = function(event) {
+  $('#test').html($('#test').html() + '<br />' + event.data);
+};
+worker.postMessage({command: 'start', count: 10});
+</script>
+
 </body>
 </html>
 
