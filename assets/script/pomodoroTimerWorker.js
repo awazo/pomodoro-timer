@@ -5,6 +5,7 @@ importScripts(scriptPath + 'workerBase.js');
 } catch(e) {
   console.log(e);
   console.log('for local use: setup script directory path as "file://xxx"');
+  throw e;
 }
 
 var count = 0;
