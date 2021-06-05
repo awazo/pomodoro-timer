@@ -1,4 +1,4 @@
-let scriptPath = 'https://awazo.github.io/pomodoro-timer/assets/script/';
+let scriptPath = 'file:///C:/Users/awazo/Desktop/repositories/git/pomodoro-timer/assets/script/';
 
 // for local use: setup script directory path as "file://xxx"
 importScripts(scriptPath + 'workerBase.js');
