@@ -1,8 +1,7 @@
-let scriptPath = '';
+let scriptPath = 'https://awazo.github.io/pomodoro-timer/assets/script/';
 
 // for local use: setup script directory path as "file://xxx"
-// importScripts(scriptPath + 'workerBase.js');
-importScripts(scriptPath + 'test.js');
+importScripts(scriptPath + 'workerBase.js');
 
 var count = 0;
 var timer = null;
