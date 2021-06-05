@@ -6,6 +6,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
     crossorigin="anonymous"></script>
+  <script src="./assets/script/workerBase.js"></script>
   <script src="./assets/script/pomodoro.js"></script>
   <title>pomodoro timer</title>
 </head>
@@ -71,6 +72,7 @@ function initialize() {
   $('.config').hide();
   hideStatus();
   hideButtonStop();
+  pomodoroInitialize();
 }
 
 // menu open: true, menu close: false
@@ -178,30 +180,6 @@ function pomodoroRestStart(pomodoroCurrent) {
 function pomodoroRestEnd(pomodoroCurrent) {
   hideStatus();
 }
-</script>
-
-<script class="test">
-/*
-$('body').append($('<div></div>').addClass('test').attr('id', 'test'));
-$('.test').css('color', '#C0C0C0');
-
-let baseURL = window.location.href.replace(/\\/g, '/').replace(/\/[^\/]*$/, '/');
-let array = ['importScripts("' + baseURL + 'assets/script/pomodoroTimerWorker.js' + '");'];
-let blob = new Blob(array, {type: 'text/javascript'});
-let url = window.URL.createObjectURL(blob);
-
-let worker;
-try {
-worker = new Worker(url);
-} catch(e) {
-worker = new Worker('assets/script/pomodoroTimerWorker.js');
-}
-
-worker.onmessage = function(event) {
-  $('#test').html($('#test').html() + '<br />' + event.data);
-};
-worker.postMessage({command: 'start', count: 10});
-*/
 </script>
 
 </body>

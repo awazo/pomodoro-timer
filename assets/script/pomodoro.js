@@ -93,6 +93,70 @@ pomodoro.on = function(event, handler) {
   pomodoro.event[event] = handler;
 };
 
+pomodoro.timerWorker = null;
+pomodoro.timerWorkerHandleUpdate = function(message) {
+  pomodoro.current.time = message.content;
+  pomodoro.timerWorkerResult(message);
+  if (pomodoro.current.time <= 0) {
+    let nextStatus = pomodoro.getNextStatus(pomodoro.current);
+    let nextTimerStatus = pomodoro.current.timerStatus;
+    let nextTurn = pomodoro.current.turn;
+    let nextTime = 0;
+    if ((pomodoro.current.status === pomodoro.status.work)
+        && (nextStatus === pomodoro.status.rest)) {
+      nextTime = pomodoro.config.restMinute * 60;
+    } else if ((pomodoro.current.status === pomodoro.status.work)
+               && (nextStatus === pomodoro.status.longRest)) {
+      nextTime = pomodoro.config.longRestMinute * 60;
+    } else if ((pomodoro.current.status === pomodoro.status.rest)
+               && (nextStatus === pomodoro.status.work)) {
+      nextTurn += 1;
+      nextTime = pomodoro.config.workMinute * 60;
+    } else if ((pomodoro.current.status === pomodoro.status.longRest)
+               && (nextStatus === pomodoro.status.work)) {
+      nextTurn = 1;
+      nextTime = pomodoro.config.workMinute * 60;
+    } else {
+      pomodoro.stop();
+      return;
+    }
+    pomodoro.timerWorkerReset(nextTime);
+    pomodoro.setCurrent(nextStatus, nextTimerStatus, nextTurn, nextTime);
+  }
+  pomodoro.updater(pomodoro.current);
+};
+pomodoro.timerWorkerInit = function() {
+  let scriptPath = 'assets/script/';
+  let path = scriptPath + 'pomodoroTimerWorker.js';
+  pomodoro.timerWorker = workerBase.createWorker(path);
+  let handlerMap = {
+    'result': function(message) {},
+    'update': pomodoro.timerWorkerHandleUpdate
+  };
+  let handler = workerBase.handlerMapper(handlerMap);
+  workerBase.initWorker(handler, pomodoro.timerWorker);
+};
+pomodoro.timerWorkerStart = function() {
+  if (pomodoro.timerWorker == null) return;
+  let message = workerBase.createMessageCommand('start');
+  workerBase.send(message, pomodoro.timerWorker);
+};
+pomodoro.timerWorkerStop = function() {
+  if (pomodoro.timerWorker == null) return;
+  let message = workerBase.createMessageCommand('stop');
+  workerBase.send(message, pomodoro.timerWorker);
+};
+pomodoro.timerWorkerReset = function(resetTime) {
+  if (pomodoro.timerWorker == null) return;
+  let message = workerBase.createMessageCommand('reset', resetTime);
+  workerBase.send(message, pomodoro.timerWorker);
+};
+pomodoro.timerWorkerResult = function(baseMessage) {
+  if (pomodoro.timerWorker == null) return;
+  let message = workerBase.createMessageResult(baseMessage.name, true);
+  workerBase.send(message, pomodoro.timerWorker);
+};
+
 pomodoro.init = function(workMinute, restMinute, turns, longRestMinute) {
   try {
     pomodoro.isSuppressEvent = true;
@@ -114,6 +178,9 @@ pomodoro.init = function(workMinute, restMinute, turns, longRestMinute) {
     pomodoro.setTimerStatus(pomodoro.timerStatus.stop);
     pomodoro.current.turn = 1;
     pomodoro.current.time = workMinute * 60;
+    if (pomodoro.timerWorker == null)
+      pomodoro.timerWorkerInit();
+    pomodoro.timerWorkerReset(pomodoro.current.time);
   } finally {
     pomodoro.isSuppressEvent = false;
   }
@@ -130,40 +197,11 @@ pomodoro.start = function(updater) {
   }
   pomodoro.setTimerStatus(pomodoro.timerStatus.start);
   pomodoro.updater(pomodoro.current);
-  pomodoro.timer = setInterval(function() {
-    pomodoro.current.time -= 1;
-    if (pomodoro.current.time <= 0) {
-      let nextStatus = pomodoro.getNextStatus(pomodoro.current);
-      let nextTimerStatus = pomodoro.current.timerStatus;
-      let nextTurn = pomodoro.current.turn;
-      let nextTime = 0;
-      if ((pomodoro.current.status === pomodoro.status.work)
-          && (nextStatus === pomodoro.status.rest)) {
-        nextTime = pomodoro.config.restMinute * 60;
-      } else if ((pomodoro.current.status === pomodoro.status.work)
-                 && (nextStatus === pomodoro.status.longRest)) {
-        nextTime = pomodoro.config.longRestMinute * 60;
-      } else if ((pomodoro.current.status === pomodoro.status.rest)
-                 && (nextStatus === pomodoro.status.work)) {
-        nextTurn += 1;
-        nextTime = pomodoro.config.workMinute * 60;
-      } else if ((pomodoro.current.status === pomodoro.status.longRest)
-                 && (nextStatus === pomodoro.status.work)) {
-        nextTurn = 1;
-        nextTime = pomodoro.config.workMinute * 60;
-      } else {
-        pomodoro.stop();
-        return;
-      }
-      pomodoro.setCurrent(nextStatus, nextTimerStatus, nextTurn, nextTime);
-    }
-    pomodoro.updater(pomodoro.current);
-  }, 1000);
+  pomodoro.timerWorkerStart();
 };
 
 pomodoro.stop = function() {
-  if (pomodoro.timer == null) return;
-  clearInterval(pomodoro.timer);
+  pomodoro.timerWorkerStop();
   pomodoro.setTimerStatus(pomodoro.timerStatus.stop);
 };
 
@@ -171,7 +209,8 @@ pomodoro.reset = function() {
   let status = pomodoro.status.init;
   let timerStatus = pomodoro.current.timerStatus;
   let turns = 1;
-  let time = 0;
+  let time = pomodoro.config.workMinute * 60;
+  pomodoro.timerWorkerReset(time);
   pomodoro.setCurrent(status, timerStatus, turns, time);
   pomodoro.updater(pomodoro.current);
 };
@@ -187,6 +226,7 @@ pomodoro.resetTurn = function() {
     pomodoro.setStatus(pomodoro.status.init);
     if (pomodoro.current.timerStatus === pomodoro.timerStatus.start)
       pomodoro.isSuppressEvent = false;
+    pomodoro.timerWorkerReset(time);
     pomodoro.setCurrent(status, timerStatus, turns, time);
   } finally {
     pomodoro.isSuppressEvent = false;
@@ -210,6 +250,7 @@ pomodoro.resetTime = function() {
     pomodoro.setStatus(pomodoro.status.init);
     if (pomodoro.current.timerStatus === pomodoro.timerStatus.start)
       pomodoro.isSuppressEvent = false;
+    pomodoro.timerWorkerReset(time);
     pomodoro.setCurrent(status, timerStatus, turns, time);
   } finally {
     pomodoro.isSuppressEvent = false;
