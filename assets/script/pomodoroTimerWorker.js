@@ -1,6 +1,6 @@
+// for local use: setup script directory path as "file://xxx"
 let scriptPath = 'file:///C:/Users/awazo/Desktop/repositories/git/pomodoro-timer/assets/script/';
 
-// for local use: setup script directory path as "file://xxx"
 importScripts(scriptPath + 'workerBase.js');
 
 var count = 0;
